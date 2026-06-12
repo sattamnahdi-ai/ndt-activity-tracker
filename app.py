@@ -74,7 +74,8 @@ technicians = st.multiselect(
     ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS", "FLC"]
 )
 
-st.markdown("<br>", unsafe_allow_width=True)
+st.markdown("<br>", unsafe_allow_html=True)
+
 
 # --- أزرار التحكم بالأنشطة ---
 col1, col2 = st.columns(2)

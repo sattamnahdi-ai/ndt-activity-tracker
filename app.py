@@ -44,7 +44,10 @@ if "toast_message" not in st.session_state:
 
 # --- 4. دالة إضافة النشاط وتفريغ الحقول (Callback) ---
 def add_activity_callback():
+    # جلب نوع الخط المختار (TL أو OSI) ورقم الخط
+    line_type = st.session_state.line_type_key
     line_number = st.session_state.line_key.replace("Line ", "")
+    
     km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
     
     # صياغة نص الـ UT بحيث تأتي الملاحظات بَعدَه مباشرة
@@ -55,13 +58,14 @@ def add_activity_callback():
         
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    # تركيب نص النشاط
-    single_activity = f"TL {line_number} km {km_display}\n {ut_line}\nTech : {techs_list}"
+    # تركيب نص النشاط بالاعتماد على النوع المختار (TL أو OSI)
+    single_activity = f"{line_type} {line_number} km {km_display}\n {ut_line}\nTech : {techs_list}"
     
     # حفظ النشاط في القائمة
     st.session_state.activities_list.append(single_activity)
     
-    # تفريغ كافة الحقول وإعادتها لوضعها الافتراضي (آمن تماماً هنا)
+    # تفريغ كافة الحقول وإعادتها لوضعها الافتراضي لتهيئتها للنشاط القادم
+    st.session_state.line_type_key = "TL"
     st.session_state.line_key = "Line 1"
     st.session_state.km_key = 0.0
     st.session_state.remarks_key = ""
@@ -85,9 +89,17 @@ if st.session_state.toast_message:
 # --- قسم إدخال بيانات النشاط الحالي ---
 st.markdown("### 📥 إدخال بيانات النشاط | Enter Activity Details")
 
-# اختيار الخط
+# التعديل الجديد: اختيار نوع الخط (TL أو OSI)
+st.radio(
+    "🏷️ نوع الخط | Line Type",
+    ["TL", "OSI"],
+    horizontal=True,
+    key="line_type_key"
+)
+
+# اختيار رقم الخط
 st.selectbox(
-    "📍 اختر الخط | Select Line", 
+    "📍 اختر رقم الخط | Select Line Number", 
     [f"Line {i}" for i in range(1, 13)],
     key="line_key"
 )

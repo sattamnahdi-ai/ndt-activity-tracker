@@ -42,4 +42,48 @@ trunk_line = st.selectbox(
     [f"Line {i}" for i in range(1, 13)]
 )
 
-# 2. إدخال الكيلومترات (يبدأ فارغ وبدون أصف
+# 2. إدخال الكيلومترات (يبدأ فارغ تماماً وآمن لكل إصدارات Streamlit)
+km_input = st.text_input(
+    "🛣️ إدخال الكيلومترات | Enter Kilometers", 
+    value=""
+)
+
+# 3. حقل الملاحظات (Remarks)
+remarks_input = st.text_input("📌 ملاحظات | Remarks")
+
+# 4. حالة الـ UT
+ut_status = st.radio(
+    "🔍 حالة الفحص | UT Status", 
+    ["Complete", "Not Complete"],
+    horizontal=True
+)
+
+# 5. اختيار الفنيين المختصر (TECH)
+technicians = st.multiselect(
+    "👥 اختر الفنيين | Select Technicians (TECH)", 
+    ["Tech A", "Tech B", "Tech C", "Tech D"]
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# --- تجهيز نص رسالة الواتساب المختصرة والاحترافية ---
+line_number = trunk_line.replace("Line ", "")
+
+# ضبط صيغة حالة الـ UT وإضافة الملاحظة بجانبها بين قوسين لو وُجدت
+ut_text = f"UT {ut_status}"
+if remarks_input:
+    ut_text += f" ({remarks_input})"
+
+techs_list = " / ".join(technicians) if technicians else "N/A"
+
+# نص الرسالة النهائي بالصيغة المختصرة والعملية المطلوبة
+whatsapp_text = f"""📍 TL {line_number} km {km_input}
+🔍 {ut_text}
+👥 Tech: {techs_list}"""
+
+# ترميز النص للرابط ليتوافق مع التطبيق والمتصفح
+encoded_message = urllib.parse.quote(whatsapp_text)
+whatsapp_url = f"https://wa.me/?text={encoded_message}"
+
+# زر إرسال عبر الواتساب ممتد بالكامل ليناسب شاشات الجوال والكمبيوتر
+st.link_button("🟢 إرسال عبر الواتساب | WhatsApp", whatsapp_url, use_container_width=True, type="primary")

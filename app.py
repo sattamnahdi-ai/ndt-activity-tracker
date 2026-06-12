@@ -36,22 +36,64 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown("<h1 class='main-title'>📋 النشاط اليومي المتعدد | Daily Activities</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
-# 3. تهيئة الذاكرة التخزينية لحفظ الأنشطة المتعددة
+# 3. تهيئة الذاكرة التخزينية وحالات الإشعارات
 if "activities_list" not in st.session_state:
     st.session_state.activities_list = []
+if "toast_message" not in st.session_state:
+    st.session_state.toast_message = None
+
+# --- 4. دالة إضافة النشاط وتفريغ الحقول (Callback) ---
+def add_activity_callback():
+    line_number = st.session_state.line_key.replace("Line ", "")
+    km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
+    
+    # صياغة نص الـ UT بحيث تأتي الملاحظات بَعدَه مباشرة
+    if st.session_state.remarks_key:
+        ut_line = f"UT {st.session_state.ut_key} {st.session_state.remarks_key}"
+    else:
+        ut_line = f"UT {st.session_state.ut_key}"
+        
+    techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
+    
+    # تركيب نص النشاط
+    single_activity = f"TL {line_number} km {km_display}\n {ut_line}\nTech : {techs_list}"
+    
+    # حفظ النشاط في القائمة
+    st.session_state.activities_list.append(single_activity)
+    
+    # تفريغ كافة الحقول وإعادتها لوضعها الافتراضي (آمن تماماً هنا)
+    st.session_state.line_key = "Line 1"
+    st.session_state.km_key = 0.0
+    st.session_state.remarks_key = ""
+    st.session_state.ut_key = "completed"
+    st.session_state.tech_key = []
+    
+    # تجهيز إشعار النجاح
+    st.session_state.toast_message = "✅ تم حفظ النشاط وتفريغ الحقول!"
+
+# دالة مسح القائمة بالكامل (Callback)
+def clear_all_callback():
+    st.session_state.activities_list = []
+    st.session_state.toast_message = "🗑️ تم مسح جميع الأنشطة"
+
+# --- عرض الإشعارات إن وجدت ---
+if st.session_state.toast_message:
+    st.toast(st.session_state.toast_message)
+    st.session_state.toast_message = None
+
 
 # --- قسم إدخال بيانات النشاط الحالي ---
 st.markdown("### 📥 إدخال بيانات النشاط | Enter Activity Details")
 
-# اختيار الخط (مع إضافة key للتحكم بالمسح)
-trunk_line = st.selectbox(
+# اختيار الخط
+st.selectbox(
     "📍 اختر الخط | Select Line", 
     [f"Line {i}" for i in range(1, 13)],
     key="line_key"
 )
 
-# إدخال الكيلومترات (مع إضافة key للتحكم بالمسح)
-km_input = st.number_input(
+# إدخال الكيلومترات
+st.number_input(
     "🛣️ إدخال الكيلومترات | Enter Kilometers", 
     value=0.0,
     min_value=0.0, 
@@ -60,19 +102,19 @@ km_input = st.number_input(
     key="km_key"
 )
 
-# حالة الـ UT (مع إضافة key للتحكم بالمسح)
-ut_status = st.radio(
+# حالة الـ UT
+st.radio(
     "🔍 حالة الفحص | UT Status", 
     ["completed", "Not completed"],
     horizontal=True,
     key="ut_key"
 )
 
-# حقل الملاحظات - أصبح اختياري ويظهر بعد الـ UT (مع إضافة key للتحكم بالمسح)
-remarks_input = st.text_input("📌 ملاحظات إضافية (اختياري) | Remarks", key="remarks_key")
+# حقل الملاحظات
+st.text_input("📌 ملاحظات إضافية (اختياري) | Remarks", key="remarks_key")
 
-# قائمة الفنيين (مع إضافة key للتحكم بالمسح)
-technicians = st.multiselect(
+# قائمة الفنيين
+st.multiselect(
     "👥 اختر الفنيين | Select Technicians (TECH)", 
     ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS", "FLC"],
     key="tech_key"
@@ -80,46 +122,23 @@ technicians = st.multiselect(
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- أزرار التحكم بالأنشطة ---
+# --- أزرار التحكم بالأنشطة باستخدام الـ Callbacks ---
 col1, col2 = st.columns(2)
 
 with col1:
-    # زر إضافة النشاط الحالي إلى القائمة وتفريغ الحقول
-    if st.button("➕ إضافة هذا النشاط | Add Activity", use_container_width=True, type="secondary"):
-        line_number = st.session_state.line_key.replace("Line ", "")
-        km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
-        
-        # التعديل الجديد: صياغة نص الـ UT بحيث تأتي الملاحظات بَعدَه مباشرة
-        if st.session_state.remarks_key:
-            ut_line = f"UT {st.session_state.ut_key} {st.session_state.remarks_key}"
-        else:
-            ut_line = f"UT {st.session_state.ut_key}"
-            
-        techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
-        
-        # تركيب نص النشاط
-        single_activity = f"TL {line_number} km {km_display}\n {ut_line}\nTech : {techs_list}"
-        
-        # حفظ النشاط في القائمة
-        st.session_state.activities_list.append(single_activity)
-        
-        # الحــل: تفريغ كافة الحقول وإعادتها لوضعها الافتراضي فوراً للنشاط القادم
-        st.session_state.line_key = "Line 1"
-        st.session_state.km_key = 0.0
-        st.session_state.remarks_key = ""
-        st.session_state.ut_key = "completed"
-        st.session_state.tech_key = []
-        
-        # إشعار سريع بنجاح العملية وإعادة تحديث الصفحة
-        st.toast("✅ تم حفظ النشاط وتفريغ الحقول!")
-        st.rerun()
+    st.button(
+        "➕ إضافة هذا النشاط | Add Activity", 
+        use_container_width=True, 
+        type="secondary",
+        on_click=add_activity_callback
+    )
 
 with col2:
-    # زر لمسح كل الأنشطة وبدء قائمة جديدة تماماً
-    if st.button("🗑️ مسح القائمة | Clear All", use_container_width=True):
-        st.session_state.activities_list = []
-        st.toast("تم مسح جميع الأنشطة")
-        st.rerun()
+    st.button(
+        "🗑️ مسح القائمة | Clear All", 
+        use_container_width=True,
+        on_click=clear_all_callback
+    )
 
 st.markdown("---")
 

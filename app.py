@@ -61,10 +61,10 @@ ut_status = st.radio(
     horizontal=True
 )
 
-# 5. اختيار الفنيين المختصر (TECH)
+# 5. اختيار الفنيين بالاختصارات الجديدة المطلوبة
 technicians = st.multiselect(
     "👥 اختر الفنيين | Select Technicians (TECH)", 
-    ["Tech A", "Tech B", "Tech C", "Tech D"]
+    ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS"]
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -80,8 +80,8 @@ if remarks_input:
 
 techs_list = " / ".join(technicians) if technicians else "N/A"
 
-# نص الرسالة النهائي بالصيغة المختصرة والعملية المطلوبة مع عبارة الترحيب فوق
-whatsapp_text = f"""Hello Activities today
+# نص الرسالة النهائي مع إضافة الإيموجي بجانب عنوان النشاط اليومي
+whatsapp_text = f"""Hello Activities today 📋
 
 📍 TL {line_number} km {km_display}
 🔍 {ut_text}

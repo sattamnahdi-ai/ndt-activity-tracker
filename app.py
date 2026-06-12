@@ -80,8 +80,8 @@ if remarks_input:
 
 techs_list = " / ".join(technicians) if technicians else "N/A"
 
-# نص الرسالة النهائي مع إضافة الإيموجي بجانب عنوان النشاط اليومي
-whatsapp_text = f"""Hello Activities today 📋
+# نص الرسالة النهائي مع نقل الإيموجي إلى بداية السطر
+whatsapp_text = f"""📋 Hello Activities today
 
 📍 TL {line_number} km {km_display}
 🔍 {ut_text}

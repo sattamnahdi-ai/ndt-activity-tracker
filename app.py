@@ -42,10 +42,13 @@ trunk_line = st.selectbox(
     [f"Line {i}" for i in range(1, 13)]
 )
 
-# 2. إدخال الكيلومترات (يبدأ فارغ تماماً وآمن لكل إصدارات Streamlit)
-km_input = st.text_input(
+# 2. إدخال الكيلومترات كحقل رقمي (يفتح الكيبورد الرقمي تلقائياً في الجوال)
+km_input = st.number_input(
     "🛣️ إدخال الكيلومترات | Enter Kilometers", 
-    value=""
+    value=0.0,
+    min_value=0.0, 
+    step=0.1,
+    format="%g"
 )
 
 # 3. حقل الملاحظات (Remarks)
@@ -68,6 +71,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # --- تجهيز نص رسالة الواتساب المختصرة والاحترافية ---
 line_number = trunk_line.replace("Line ", "")
+km_display = str(km_input) if km_input != 0.0 else "0"
 
 # ضبط صيغة حالة الـ UT وإضافة الملاحظة بجانبها بين قوسين لو وُجدت
 ut_text = f"UT {ut_status}"
@@ -76,8 +80,10 @@ if remarks_input:
 
 techs_list = " / ".join(technicians) if technicians else "N/A"
 
-# نص الرسالة النهائي بالصيغة المختصرة والعملية المطلوبة
-whatsapp_text = f"""📍 TL {line_number} km {km_input}
+# نص الرسالة النهائي بالصيغة المختصرة والعملية المطلوبة مع عبارة الترحيب فوق
+whatsapp_text = f"""Hello Activities today
+
+📍 TL {line_number} km {km_display}
 🔍 {ut_text}
 👥 Tech: {techs_list}"""
 

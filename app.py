@@ -1,20 +1,18 @@
 import streamlit as st
 import urllib.parse
 
-# 1. إعدادات الصفحة وتفعيل التجاوب مع الشاشات
+# 1. إعداد الصفحة
 st.set_page_config(page_title="Activity Today", page_icon="📋", layout="centered")
 
-# 2. تنسيق CSS مخصص لجعل الواجهة ممتازة على الجوال والكمبيوتر
+# 2. التنسيق الخاص بالخطوط والمظهر (مناسب للجوال والكمبيوتر)
 custom_css = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     
-    /* توحيد الخط المريح للعين */
     html, body, [data-testid="stSidebar"], .stKeyedTextBox, input, select, button, span, p, div {
         font-family: 'Cairo', sans-serif !important;
     }
     
-    /* تنسيق العنوان الرئيسي */
     .main-title {
         text-align: center;
         color: #1E88E5;
@@ -23,12 +21,10 @@ custom_css = """
         margin-bottom: 20px;
     }
     
-    /* زيادة مساحات العناصر لتسهيل اللمس في الجوال */
     div[data-baseweb="select"], div[data-baseweb="input"] {
         font-size: 16px !important;
     }
     
-    /* تحسين خيارات الـ Radio Button */
     [data-testid="stMarkdownContainer"] p {
         font-size: 15px;
     }
@@ -36,21 +32,20 @@ custom_css = """
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# عنوان البرنامج
-st.markdown("<h1 class='main-title'>📋 Activity Today | النشاط اليومي</h1>", unsafe_allow_html=True)
+# عنوان البرنامج الرئيسي
+st.markdown("<h1 class='main-title'>النشاط اليومي | Activity Today</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
-# --- مدخلات البيانات ---
-
-# 1. اختيار الـ Trunk Line
+# 1. اختيار الخط
 trunk_line = st.selectbox(
-    "اختر خط الجذع | Select Trunk Line", 
+    "اختر الخط | Select Line", 
     [f"Line {i}" for i in range(1, 13)]
 )
 
-# 2. إدخال الكيلومترات (تم إلغاء الأصفار الإجبارية الزائدة باستخدام format="%g")
+# 2. إدخال الكيلومترات (يبدأ فارغ وبدون أصفار تلقائية)
 km_input = st.number_input(
     "إدخال الكيلومترات | Enter Kilometers", 
+    value=None,
     min_value=0.0, 
     step=0.1,
     format="%g"
@@ -60,7 +55,7 @@ km_input = st.number_input(
 ut_status = st.radio(
     "حالة الفحص | UT Status", 
     ["Complete", "Not Complete"],
-    horizontal=True # مصفوفة أفقياً لتوفير المساحة على الجوال
+    horizontal=True
 )
 
 # 4. اختيار الفنيين
@@ -71,28 +66,20 @@ technicians = st.multiselect(
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- تجهيز نص رسالة الواتساب تلقائياً ---
-techs_list = ", ".join(technicians) if technicians else "لم يتم الاختيار"
+# 5. تجهيز نص الواتساب الرسمي والعملي (بدون إيموجيات)
+techs_list = ", ".join(technicians) if technicians else "N/A"
+km_display = km_input if km_input is not None else ""
 
-whatsapp_text = f"""📋 *Activity Today | النشاط اليومي*
-----------------------------------
-📍 *Trunk Line:* {trunk_line}
-🛣️ *Kilometers:* {km_input} KM
-🔍 *UT Status:* {ut_status}
-👥 *Technicians:* {techs_list}"""
+whatsapp_text = f"""Activity Today Report
+---------------------
+Trunk Line: {trunk_line}
+Kilometers: {km_display} KM
+UT Status: {ut_status}
+Technicians: {techs_list}"""
 
-# ترميز النص ليتوافق مع روابط الويب
+# ترميز النص للرابط ليتوافق مع المتصفحات والتطبيق
 encoded_message = urllib.parse.quote(whatsapp_text)
 whatsapp_url = f"https://wa.me/?text={encoded_message}"
 
-
-# --- أزرار التحكم (متجاوبة تماماً مع الجوال والكمبيوتر) ---
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("💾 حفظ في النظام | Submit", use_container_width=True, type="secondary"):
-        st.success("تم تسجيل النشاط في النظام بنجاح! 🎉")
-
-with col2:
-    # زر الواتساب المباشر - يفتح التطبيق فوراً بالرسالة جاهزة
-    st.link_button("🟢 إرسال عبر الواتساب | WhatsApp", whatsapp_url, use_container_width=True, type="primary")
+# زر إرسال عبر الواتساب ممتد بالكامل ليناسب شاشات الجوال
+st.link_button("إرسال عبر الواتساب | WhatsApp", whatsapp_url, use_container_width=True, type="primary")

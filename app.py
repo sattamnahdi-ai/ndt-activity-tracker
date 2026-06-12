@@ -44,9 +44,13 @@ if "toast_message" not in st.session_state:
 
 # --- 4. دالة إضافة النشاط وتفريغ الحقول (Callback) ---
 def add_activity_callback():
-    # جلب نوع الخط المختار (TL أو OSI) ورقم الخط
     line_type = st.session_state.line_type_key
-    line_number = st.session_state.line_key.replace("Line ", "")
+    
+    # استخراج القيمة بناءً على نوع الخط (رقم الخط للـ TL، أو اسم المنطقة للـ OSI)
+    if line_type == "TL":
+        line_val = st.session_state.line_key.replace("Line ", "")
+    else:
+        line_val = st.session_state.line_key  # ستكون المنطقة مباشرة (KHRS, ABJF, MZLG)
     
     km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
     
@@ -58,8 +62,8 @@ def add_activity_callback():
         
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    # تركيب نص النشاط بالاعتماد على النوع المختار (TL أو OSI)
-    single_activity = f"{line_type} {line_number} km {km_display}\n {ut_line}\nTech : {techs_list}"
+    # تركيب نص النشاط بالاعتماد على النوع المختار
+    single_activity = f"{line_type} {line_val} km {km_display}\n {ut_line}\nTech : {techs_list}"
     
     # حفظ النشاط في القائمة
     st.session_state.activities_list.append(single_activity)
@@ -89,7 +93,7 @@ if st.session_state.toast_message:
 # --- قسم إدخال بيانات النشاط الحالي ---
 st.markdown("### 📥 إدخال بيانات النشاط | Enter Activity Details")
 
-# التعديل الجديد: اختيار نوع الخط (TL أو OSI)
+# اختيار نوع الخط (TL أو OSI)
 st.radio(
     "🏷️ نوع الخط | Line Type",
     ["TL", "OSI"],
@@ -97,12 +101,27 @@ st.radio(
     key="line_type_key"
 )
 
-# اختيار رقم الخط
-st.selectbox(
-    "📍 اختر رقم الخط | Select Line Number", 
-    [f"Line {i}" for i in range(1, 13)],
-    key="line_key"
-)
+# 🔄 التعديل الجديد: تغيير المسمى والخيارات ديناميكياً مع حماية الـ الذاكرة من التعارض
+if st.session_state.line_type_key == "TL":
+    # إذا تحول المستخدم لـ TL وكانت القيمة السابقة منطقة، نعيد تصفيرها لخيار الخطوط لمنع حدوث خطأ
+    if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
+        st.session_state.line_key = "Line 1"
+        
+    st.selectbox(
+        "📍 اختر رقم الخط | Select Line Number", 
+        [f"Line {i}" for i in range(1, 13)],
+        key="line_key"
+    )
+else:
+    # إذا تحول المستخدم لـ OSI وكان مخزن خط قديم، نغيره فوراً إلى أول منطقة لمنع حدوث خطأ
+    if "line_key" in st.session_state and st.session_state.line_key not in ["KHRS", "ABJF", "MZLG"]:
+        st.session_state.line_key = "KHRS"
+        
+    st.selectbox(
+        "📍 اختر المنطقة | Select Area", 
+        ["KHRS", "ABJF", "MZLG"],
+        key="line_key"
+    )
 
 # إدخال الكيلومترات
 st.number_input(

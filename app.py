@@ -1,63 +1,143 @@
 import streamlit as st
 import urllib.parse
 
-# 1. إعداد الصفحة وتفعيل التجاوب مع الشاشات
+# 1. Page Configuration
 st.set_page_config(page_title="Activity Today", page_icon="📋", layout="centered")
 
-# 2. التنسيق الخاص بالخطوط والمظهر (مناسب للجوال والكمبيوتر)
-custom_css = """
+# 2. Initialize Session States
+if "activities_list" not in st.session_state:
+    st.session_state.activities_list = []
+if "toast_message" not in st.session_state:
+    st.session_state.toast_message = None
+if "lang" not in st.session_state:
+    st.session_state.lang = "EN"  # Default language is English
+if "theme" not in st.session_state:
+    st.session_state.theme = "Light"  # Default theme is Light
+
+# 3. Translation Dictionary
+translations = {
+    "EN": {
+        "title": "📋 Daily Activities Tracker",
+        "input_header": "📥 Enter Activity Details",
+        "act_type": "🏷️ Type of Activity",
+        "line_num": "📍 Select Line Number",
+        "area": "📍 Select Area",
+        "km": "🛣️ Enter Kilometers",
+        "wh": "🛢️ Enter Well Number / Well Head",
+        "wh_placeholder": "e.g., 12 or KHRS-45",
+        "ut": "🔍 UT Status",
+        "remarks": "📌 Remarks (Optional)",
+        "techs": "👥 Select Technicians (TECH)",
+        "add_btn": "➕ Add Activity",
+        "clear_btn": "🗑️ Clear All",
+        "preview": "👁️ Message Preview ({count} activities added)",
+        "send_wa": "🟢 Send All via WhatsApp",
+        "empty": "💡 The list is currently empty. Fill in the details above and click (Add Activity) to compile the message.",
+        "success_toast": "✅ Activity saved and fields cleared!",
+        "clear_toast": "🗑️ All activities cleared",
+        "toggle_lang": "🌐 Switch to العربية",
+        "toggle_theme": "🌙 Dark Mode" if st.session_state.theme == "Light" else "☀️ Light Mode"
+    },
+    "AR": {
+        "title": "📋 متتبع الأنشطة اليومية",
+        "input_header": "📥 إدخل بيانات النشاط",
+        "act_type": "🏷️ نوع النشاط",
+        "line_num": "📍 اختر رقم الخط",
+        "area": "📍 اختر المنطقة",
+        "km": "🛣️ إدخال الكيلومترات",
+        "wh": "🛢️ رقم العين أو الـ Well Head",
+        "wh_placeholder": "مثال: 12 أو KHRS-45",
+        "ut": "🔍 حالة الفحص",
+        "remarks": "📌 ملاحظات إضافية (اختياري)",
+        "techs": "👥 اختر الفنيين (TECH)",
+        "add_btn": "➕ إضافة هذا النشاط",
+        "clear_btn": "🗑️ مسح القائمة",
+        "preview": "👁️ معاينة الرسالة ({count} أنشطة مضافة)",
+        "send_wa": "🟢 إرسال الكل عبر الواتساب",
+        "empty": "💡 القائمة فارغة حالياً. قم بتعبئة البيانات في الأعلى ثم اضغط على (إضافة هذا النشاط) لتتمكن من إنشاء الرسالة وتجميعها.",
+        "success_toast": "✅ تم حفظ النشاط وتفريغ الحقول!",
+        "clear_toast": "🗑️ تم مسح جميع الأنشطة",
+        "toggle_lang": "🌐 Switch to English",
+        "toggle_theme": "🌙 الوضع الليلي" if st.session_state.theme == "Light" else "☀️ الوضع النهاري"
+    }
+}
+
+# Shortcut variable for current language dictionary
+t = translations[st.session_state.lang]
+
+# 4. Custom Theme & Language CSS Injection
+direction = "rtl" if st.session_state.lang == "AR" else "ltr"
+text_align = "right" if st.session_state.lang == "AR" else "left"
+
+if st.session_state.theme == "Dark":
+    bg_color = "#121212"
+    text_color = "#FFFFFF"
+    card_bg = "#1E1E1E"
+    input_bg = "#2D2D2D"
+else:
+    bg_color = "#FFFFFF"
+    text_color = "#111111"
+    card_bg = "#F8F9FA"
+    input_bg = "#FFFFFF"
+
+custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    html, body, [data-testid="stSidebar"], .stKeyedTextBox, input, select, button, span, p, div {
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+        background-color: {bg_color} !important;
+        color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
-    }
+        direction: {direction};
+        text-align: {text_align};
+    }}
     
-    .main-title {
+    .main-title {{
         text-align: center;
         color: #1E88E5;
         font-size: 26px;
         font-weight: 700;
         margin-bottom: 20px;
-    }
+    }}
     
-    div[data-baseweb="select"], div[data-baseweb="input"] {
+    /* Input field styling adjustments for Dark/Light mode */
+    div[data-baseweb="select"], div[data-baseweb="input"], input {{
         font-size: 16px !important;
-    }
-    
-    [data-testid="stMarkdownContainer"] p {
-        font-size: 15px;
-    }
+    }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# عنوان البرنامج الرئيسي
-st.markdown("<h1 class='main-title'>📋 النشاط اليومي المتعدد | Daily Activities</h1>", unsafe_allow_html=True)
+# 5. Top Controls (Language & Theme Switchers)
+col_lang, col_theme = st.columns(2)
+
+with col_lang:
+    if st.button(t["toggle_lang"], use_container_width=True):
+        st.session_state.lang = "AR" if st.session_state.lang == "EN" else "EN"
+        st.rerun()
+
+with col_theme:
+    if st.button(t["toggle_theme"], use_container_width=True):
+        st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
+        st.rerun()
+
+# App Main Title
+st.markdown(f"<h1 class='main-title'>{t['title']}</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
-# 3. تهيئة الذاكرة التخزينية وح حالات الإشعارات
-if "activities_list" not in st.session_state:
-    st.session_state.activities_list = []
-if "toast_message" not in st.session_state:
-    st.session_state.toast_message = None
-
-# --- 4. دالة إضافة النشاط وتفريغ الحقول (Callback) ---
+# --- 6. Callback Functions ---
 def add_activity_callback():
-    line_type = st.session_state.line_type_key
+    act_type = st.session_state.line_type_key
     
-    # استخراج القيم بناءً على نوع النشاط والـ Location
-    if line_type == "TL":
+    if act_type == "TL":
         line_val = st.session_state.line_key.replace("Line ", "")
         km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
         location_part = f"km {km_display}"
     else:
-        line_val = st.session_state.line_key  # المنطقة (KHRS, ABJF, MZLG)
-        # جلب رقم العين المكتوب، وفي حال كان فارغاً نضع 0 تلقائياً
+        line_val = st.session_state.line_key
         wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
         location_part = f"WH {wh_display}"
     
-    # صياغة نص الـ UT بحيث تأتي الملاحظات بَعدَه مباشرة
     if st.session_state.remarks_key:
         ut_line = f"UT {st.session_state.ut_key} {st.session_state.remarks_key}"
     else:
@@ -65,60 +145,55 @@ def add_activity_callback():
         
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    # تركيب نص النشاط بالاعتماد على النوع المختار
-    single_activity = f"{line_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
-    
-    # حفظ النشاط في القائمة
+    # Keeping the core output format standard in English for reporting
+    single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     st.session_state.activities_list.append(single_activity)
     
-    # تفريغ كافة الحقول وإعادتها لوضعها الافتراضي لتهيئتها للنشاط القادم
+    # Reset Fields
     st.session_state.line_type_key = "TL"
     st.session_state.line_key = "Line 1"
     st.session_state.km_key = 0.0
-    st.session_state.wh_key = ""  # تصفير حقل رقم العين
+    st.session_state.wh_key = ""
     st.session_state.remarks_key = ""
     st.session_state.ut_key = "completed"
     st.session_state.tech_key = []
     
-    # تجهيز إشعار النجاح
-    st.session_state.toast_message = "✅ تم حفظ النشاط وتفريغ الحقول!"
+    st.session_state.toast_message = t["success_toast"]
 
-# دالة مسح القائمة بالكامل (Callback)
 def clear_all_callback():
     st.session_state.activities_list = []
-    st.session_state.toast_message = "🗑️ تم مسح جميع الأنشطة"
+    st.session_state.toast_message = t["clear_toast"]
 
-# --- عرض الإشعارات إن وجدت ---
+# Display Toasts
 if st.session_state.toast_message:
     st.toast(st.session_state.toast_message)
     st.session_state.toast_message = None
 
 
-# --- قسم إدخال بيانات النشاط الحالي ---
-st.markdown("### 📥 إدخال بيانات النشاط | Enter Activity Details")
+# --- 7. Activity Input Section ---
+st.markdown(f"### {t['input_header']}")
 
-# 🔥 التعديل الجديد: تم تغيير المسمى هنا إلى نوع النشاط | Type of Activity
+# Type of Activity
 st.radio(
-    "🏷️ نوع النشاط | Type of Activity",
+    t["act_type"],
     ["TL", "OSI"],
     horizontal=True,
     key="line_type_key"
 )
 
-# 🔄 تغيير المسمى والخيارات ديناميكياً مع حماية الـ الذاكرة من التعارض
+# Dynamic UI adjustments based on Activity Type
 if st.session_state.line_type_key == "TL":
     if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
         st.session_state.line_key = "Line 1"
         
     st.selectbox(
-        "📍 اختر رقم الخط | Select Line Number", 
+        t["line_num"], 
         [f"Line {i}" for i in range(1, 13)],
         key="line_key"
     )
     
-    # إدخال الكيلومترات الخاص بـ TL
     st.number_input(
-        "🛣️ إدخال الكيلومترات | Enter Kilometers", 
+        t["km"], 
         value=0.0,
         min_value=0.0, 
         step=0.001,
@@ -130,44 +205,43 @@ else:
         st.session_state.line_key = "KHRS"
         
     st.selectbox(
-        "📍 اختر المنطقة | Select Area", 
+        t["area"], 
         ["KHRS", "ABJF", "MZLG"],
         key="line_key"
     )
     
-    # إدخال رقم العين أو Well Head الخاص بـ OSI بدلاً من الكيلومترات
     st.text_input(
-        "🛢️ رقم العين أو الـ Well Head | Enter Well Number / Well Head",
+        t["wh"],
         key="wh_key",
-        placeholder="مثال: 12 أو KHRS-45"
+        placeholder=t["wh_placeholder"]
     )
 
-# حالة الـ UT
+# UT Status
 st.radio(
-    "🔍 حالة الفحص | UT Status", 
+    t["ut"], 
     ["completed", "Not completed"],
     horizontal=True,
     key="ut_key"
 )
 
-# حقل الملاحظات
-st.text_input("📌 ملاحظات إضافية (اختياري) | Remarks", key="remarks_key")
+# Remarks
+st.text_input(t["remarks"], key="remarks_key")
 
-# قائمة الفنيين
+# Technicians
 st.multiselect(
-    "👥 اختر الفنيين | Select Technicians (TECH)", 
+    t["techs"], 
     ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS", "FLC"],
     key="tech_key"
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- أزرار التحكم بالأنشطة باستخدام الـ Callbacks ---
+# --- 8. Action Buttons ---
 col1, col2 = st.columns(2)
 
 with col1:
     st.button(
-        "➕ إضافة هذا النشاط | Add Activity", 
+        t["add_btn"], 
         use_container_width=True, 
         type="secondary",
         on_click=add_activity_callback
@@ -175,31 +249,25 @@ with col1:
 
 with col2:
     st.button(
-        "🗑️ مسح القائمة | Clear All", 
+        t["clear_btn"], 
         use_container_width=True,
         on_click=clear_all_callback
     )
 
 st.markdown("---")
 
-# --- قسم العرض والإرسال للواتساب ---
+# --- 9. Preview and Send Section ---
 if st.session_state.activities_list:
-    st.markdown(f"### 👁️ معاينة الرسالة ({len(st.session_state.activities_list)} أنشطة مضافة)")
+    st.markdown(f"### {t['preview'].format(count=len(st.session_state.activities_list))}")
     
-    # تجميع كل الأنشطة مع ترك سطر فارغ بين كل نشاط ونشاط
     all_activities_joined = "\n\n".join(st.session_state.activities_list)
-    
-    # النص النهائي الكامل لرسالة الواتساب
     final_whatsapp_text = f"📋 Hello Activities today \n\n{all_activities_joined}"
     
-    # عرض المعاينة داخل صندوق نصي
     st.code(final_whatsapp_text, language="text")
     
-    # ترميز النص للرابط
     encoded_message = urllib.parse.quote(final_whatsapp_text)
     whatsapp_url = f"https://wa.me/?text={encoded_message}"
     
-    # زر الإرسال النهائي
-    st.link_button("🟢 إرسال الكل عبر الواتساب | Send All via WhatsApp", whatsapp_url, use_container_width=True, type="primary")
+    st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
-    st.info("💡 القائمة فارغة حالياً. قم بتعبئة البيانات في الأعلى ثم اضغط على **(إضافة هذا النشاط)** لتتمكن من إنشاء الرسالة وتجميعها.")
+    st.info(t["empty"])

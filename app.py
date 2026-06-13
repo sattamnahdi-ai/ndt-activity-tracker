@@ -14,7 +14,7 @@ if "lang" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
-# 3. Pure Professional Translations (Zero Emojis - Fixed Text Alignment)
+# 3. Pure Professional Translations (Zero Emojis - Symmetric Alignment)
 translations = {
     "EN": {
         "title": "Daily Activities Tracker",
@@ -84,7 +84,7 @@ if st.session_state.theme == "Dark":
     text_color = "#F3F4F6"
     input_bg = "#1F2635"
     border_color = "#2D3748"
-    accent_color = "#0284C7" # Professional Royal Blue
+    accent_color = "#0284C7"
     tag_bg = "#2D3748"
     tag_text = "#38BDF8"
 else:
@@ -93,23 +93,21 @@ else:
     text_color = "#0F172A"
     input_bg = "#F1F5F9"
     border_color = "#E2E8F0"
-    accent_color = "#1D4ED8" # Crisp Corporate Blue
+    accent_color = "#1D4ED8"
     tag_bg = "#E0F2FE"
     tag_text = "#0369A1"
 
-# Injecting Native Overrides to force strict block containment and remove spaces
+# CSS Overrides to perfectly align MultiSelect, SelectBox, and Text Inputs
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    /* Force Whole App Background */
     .stApp, [data-testid="stAppViewContainer"] {{
         background-color: {bg_color} !important;
         font-family: 'Inter', sans-serif !important;
         direction: {direction} !important;
     }}
     
-    /* Absolute Control Over Content Container - Creates the Solid Fixed Box Layout */
     .block-container {{
         max-width: 600px !important;
         padding-top: 20px !important;
@@ -117,52 +115,58 @@ custom_css = f"""
         background-color: {card_bg} !important;
         border: 1px solid {border_color} !important;
         border-radius: 12px !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-        margin-top: 30px !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+        margin-top: 25px !important;
     }}
     
-    /* Tight Header/Title Formatting */
     .main-title {{
         color: {accent_color} !important;
         text-align: center !important;
-        font-size: 26px !important;
+        font-size: 25px !important;
         font-weight: 700 !important;
         margin-top: 0px !important;
         margin-bottom: 20px !important;
-        letter-spacing: -0.5px;
     }}
     
-    /* Strictly Harmonized Field Labels */
     label p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
         color: {text_color} !important;
         text-align: {text_align} !important;
         font-size: 13.5px !important;
         font-weight: 600 !important;
-        margin-bottom: 4px !important;
-        padding: 0 !important;
+        margin-bottom: 6px !important;
     }}
     
-    /* Complete Uniform Height & Width for Inputs (Fixes Select Line vs Enter KM discrepancy) */
-    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input, .stMultiSelect div {{
+    /* Perfect Symmetry Framework for ALL inputs (Text, Number, Selectbox, Multiselect) */
+    .stTextInput > div > div, 
+    .stNumberInput > div > div, 
+    .stSelectbox > div > div, 
+    .stMultiSelect > div > div {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
         border: 1px solid {border_color} !important;
         border-radius: 6px !important;
-        height: 42px !important;
+        min-height: 40px !important;
+        height: 40px !important;
+    }}
+
+    /* Internal inputs font fix */
+    .stTextInput input, .stNumberInput input, .stSelectbox div, .stMultiSelect div {{
+        color: {text_color} !important;
+        font-size: 14px !important;
     }}
     
-    /* Fix for multi-select tags padding symmetry */
+    /* Multi-Select Tag internal design symmetry */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 4px !important;
-        height: 28px !important;
+        height: 24px !important;
+        margin-top: 2px !important;
     }}
     div[data-baseweb="tag"] * {{
         color: {tag_text} !important;
         fill: {tag_text} !important;
     }}
     
-    /* Standardized Functional Buttons */
     div.stButton > button {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
@@ -170,24 +174,22 @@ custom_css = f"""
         border-radius: 6px !important;
         font-weight: 600 !important;
         width: 100% !important;
-        height: 44px !important;
+        height: 42px !important;
         font-size: 14px !important;
-        transition: all 0.2s ease !important;
     }}
     div.stButton > button:hover {{
         border-color: {accent_color} !important;
         color: {accent_color} !important;
     }}
     
-    /* Action Primary Buttons (WhatsApp) */
     div.stButton > button[kind="primary"] {{
         background-color: {accent_color} !important;
         color: #FFFFFF !important;
         border: none !important;
-        height: 48px !important;
+        height: 46px !important;
     }}
 
-    /* Upper Utility Controls Tightly Fastened Together */
+    /* Compact Top Header Utilities */
     div[data-testid="stHorizontalBlock"]:has(.top-utility-lang) {{
         direction: ltr !important;
         display: flex !important;
@@ -195,27 +197,25 @@ custom_css = f"""
         flex-wrap: nowrap !important;
         justify-content: flex-start !important;
         gap: 8px !important;
-        margin-bottom: 25px !important;
+        margin-bottom: 20px !important;
     }}
     div[data-testid="stHorizontalBlock"]:has(.top-utility-lang) div[data-testid="column"] {{
         width: auto !important;
         flex: none !important;
     }}
     
-    /* Compact Top Row Control Bars Style */
     div[data-testid="column"]:has(.top-utility-lang) button,
     div[data-testid="column"]:has(.top-utility-theme) button {{
         min-width: 85px !important;
         height: 32px !important;
         font-size: 12px !important;
-        padding: 0 10px !important;
         border-radius: 4px !important;
     }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls Header Row (Tightly Linked)
+# 5. Top Controls Header Row
 col_lang, col_theme, _ = st.columns([1, 1, 10])
 
 with col_lang:
@@ -230,7 +230,6 @@ with col_theme:
         st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
         st.rerun()
 
-# Professional Title
 st.markdown(f"<h1 class='main-title'>{t['title']}</h1>", unsafe_allow_html=True)
 
 # --- 6. Execution Callback Logic ---
@@ -281,7 +280,6 @@ st.markdown(f"##### {t['input_header']}")
 
 st.radio(t["act_type"], ["TL", "OSI", "Other"], horizontal=True, key="line_type_key")
 
-# Form Column Alignment Normalization
 if st.session_state.line_type_key == "TL":
     if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
         st.session_state.line_key = "Line 1"
@@ -349,3 +347,4 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
+

@@ -77,29 +77,32 @@ if st.session_state.theme == "Dark":
     btn_border = "#4A4B50"
     tag_bg = "#1E293B"     
     tag_text = "#93C5FD"   
+    card_bg = "#1E293B"
 else:
-    bg_color = "#FFFFFF"
-    text_color = "#31333F"
-    input_bg = "#F0F2F6"
+    # Coordinated Light Mode Colors
+    bg_color = "#F8F9FA"  
+    text_color = "#212529"  
+    input_bg = "#FFFFFF"  
     btn_bg = "#FFFFFF"
-    btn_text = "#31333F"
-    btn_border = "#D0D4DC"
-    tag_bg = "#E3F2FD"     
-    tag_text = "#0D47A1"   
+    btn_text = "#212529"
+    btn_border = "#CED4DA"  
+    tag_bg = "#E7F5FF"     
+    tag_text = "#1C7ED6"   
+    card_bg = "#FFFFFF"
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
     /* Base App Container */
-    .stApp {{
+    .stApp, [data-testid="stAppViewContainer"] {{
         background-color: {bg_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
     }}
     
     /* Base Text / Labels Handling */
-    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
+    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
         text-align: {text_align};
@@ -117,6 +120,7 @@ custom_css = f"""
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
+        border: 1px solid {btn_border} !important;
         border-radius: 8px !important;
     }}
     input {{
@@ -136,18 +140,18 @@ custom_css = f"""
     
     /* Dropdown Menu Popover Alignment */
     div[data-baseweb="popover"], div[role="listbox"] {{
-        background-color: {bg_color} !important;
+        background-color: {card_bg} !important;
     }}
     div[data-baseweb="popover"] li, div[role="option"] {{
         color: {text_color} !important;
-        background-color: {bg_color} !important;
+        background-color: {card_bg} !important;
     }}
     div[data-baseweb="popover"] li:hover, div[role="option"]:hover {{
         background-color: {input_bg} !important;
         color: #1E88E5 !important;
     }}
     
-    /* Buttons Redesign */
+    /* Standard Action Buttons (Add & Clear Buttons like before) */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
@@ -156,6 +160,8 @@ custom_css = f"""
         padding: 8px 16px !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
+        width: 100% !important;
+        height: auto !important;
     }}
     div.stButton > button:hover {{
         border-color: #1E88E5 !important;
@@ -174,12 +180,22 @@ custom_css = f"""
         color: #FFFFFF !important;
     }}
 
-    /* Top Controls Custom Layout (Forcing Left-Corner Small Squares) */
-    div[data-testid="stHorizontalBlock"]:first-of-type {{
+    /* Isolating Top Controls Row - Forces LTR & Side-by-side alignment always */
+    div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) {{
         direction: ltr !important;
-        margin-bottom: -15px;
+        display: flex !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        margin-bottom: -10px;
     }}
-    div[data-testid="stHorizontalBlock"]:first-of-type div.stButton > button {{
+    div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) div[data-testid="column"] {{
+        width: max-content !important;
+        flex: none !important;
+    }}
+    
+    /* Style only the top square buttons specifically */
+    div[data-testid="column"]:has(.top-ctrl-lang) button,
+    div[data-testid="column"]:has(.top-ctrl-theme) button {{
         width: 42px !important;
         height: 42px !important;
         min-width: 42px !important;
@@ -195,15 +211,17 @@ custom_css = f"""
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls (Language & Theme Switchers - Small Squares on the Left)
+# 5. Top Controls (Language & Theme Switchers - Clean Side-by-side Layout)
 col_lang, col_theme, _ = st.columns([1, 1, 12])
 
 with col_lang:
+    st.markdown('<span class="top-ctrl-lang"></span>', unsafe_allow_html=True)
     if st.button("🌐", key="lang_btn", help=t["toggle_lang"]):
         st.session_state.lang = "AR" if st.session_state.lang == "EN" else "EN"
         st.rerun()
 
 with col_theme:
+    st.markdown('<span class="top-ctrl-theme"></span>', unsafe_allow_html=True)
     theme_emoji = "☀️" if st.session_state.theme == "Dark" else "🌙"
     if st.button(theme_emoji, key="theme_btn", help=t["toggle_theme"]):
         st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
@@ -233,7 +251,7 @@ def add_activity_callback():
         location_part = f"km {km_display}"
         single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     else:
-        # Formatted for OSI (e.g., ABJF-467 OSI) according to your request
+        # Formatted perfectly for OSI (e.g., ABJF-467 OSI)
         area_val = st.session_state.line_key
         wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
         single_activity = f"{area_val}-{wh_display} OSI\n {ut_line}\nTech : {techs_list}"
@@ -363,4 +381,3 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
-

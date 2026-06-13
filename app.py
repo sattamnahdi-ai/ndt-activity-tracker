@@ -4,7 +4,7 @@ import urllib.parse
 # 1. Page Configuration
 st.set_page_config(page_title="Activity Today", page_icon="📋", layout="centered")
 
-# 2. Initialize Session States
+# 2. Initialize Session States (Updated Defaults for Mobile/User preference)
 if "activities_list" not in st.session_state:
     st.session_state.activities_list = []
 if "toast_message" not in st.session_state:
@@ -12,7 +12,7 @@ if "toast_message" not in st.session_state:
 if "lang" not in st.session_state:
     st.session_state.lang = "EN"  # Default language is English
 if "theme" not in st.session_state:
-    st.session_state.theme = "Light"  # Default theme is Light
+    st.session_state.theme = "Dark"  # Default theme set to Dark Mode
 
 # 3. Translation Dictionary
 translations = {
@@ -79,59 +79,64 @@ if st.session_state.theme == "Dark":
     tag_text = "#93C5FD"   
     card_bg = "#1E293B"
 else:
-    # Enhanced Light Mode Colors
     bg_color = "#F8F9FA"  
     text_color = "#212529"  
     input_bg = "#FFFFFF"  
     btn_bg = "#FFFFFF"
     btn_text = "#212529"
     btn_border = "#CED4DA"  
-    tag_bg = "#E3F2FD"     # Clear, beautiful sky blue background for tech tags
-    tag_text = "#0D47A1"   # Deep contrast blue text for legibility
+    tag_bg = "#E3F2FD"     
+    tag_text = "#0D47A1"   
     card_bg = "#FFFFFF"
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    /* Base App Container */
+    /* Base App Container & Mobile Optimization */
     .stApp, [data-testid="stAppViewContainer"] {{
         background-color: {bg_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
+        padding: 10px !important;
     }}
     
-    /* Base Text / Labels Handling */
-    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
+    /* Base Text / Labels Handling - Responsive sizes */
+    label p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
         text-align: {text_align};
+        font-size: 14px !important;
     }}
     
+    /* Responsive Title for Mobile Screen */
     .main-title {{
         color: #1E88E5 !important;
         text-align: center !important;
-        font-size: 26px;
+        font-size: calc(18px + 1vw) !important;
         font-weight: 700;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+        padding: 0 5px;
     }}
     
-    /* Inputs, Select boxes, and Field Wrappers Style */
+    /* Inputs, Select boxes Optimized for Mobile */
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
         border: 1px solid {btn_border} !important;
         border-radius: 8px !important;
+        min-height: 42px !important;
     }}
     input {{
         color: {text_color} !important;
     }}
     
-    /* Multi-Select (Technicians Tags & Icon Fix) */
+    /* Multi-Select Tags */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 6px !important;
         padding: 4px 10px !important;
+        margin: 3px !important;
     }}
     div[data-baseweb="tag"] * {{
         color: {tag_text} !important;
@@ -146,22 +151,19 @@ custom_css = f"""
         color: {text_color} !important;
         background-color: {card_bg} !important;
     }}
-    div[data-baseweb="popover"] li:hover, div[role="option"]:hover {{
-        background-color: {input_bg} !important;
-        color: #1E88E5 !important;
-    }}
     
-    /* Standard Action Buttons (Add & Clear Buttons like before) */
+    /* Buttons Optimized as Mobile Touch Targets (Min Height 44px) */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
         border: 1px solid {btn_border} !important;
         border-radius: 8px !important;
-        padding: 8px 16px !important;
+        padding: 12px 16px !important;
         font-weight: 600 !important;
         transition: all 0.3s ease !important;
         width: 100% !important;
-        height: auto !important;
+        min-height: 45px !important;
+        font-size: 15px !important;
     }}
     div.stButton > button:hover {{
         border-color: #1E88E5 !important;
@@ -169,39 +171,36 @@ custom_css = f"""
         background-color: {input_bg} !important;
     }}
     
-    /* Primary Action Button (WhatsApp Button) */
+    /* WhatsApp Button Mobile Style */
     div.stButton > button[kind="primary"] {{
         background-color: #1E88E5 !important;
         color: #FFFFFF !important;
         border: none !important;
-    }}
-    div.stButton > button[kind="primary"]:hover {{
-        background-color: #1565C0 !important;
-        color: #FFFFFF !important;
+        min-height: 48px !important;
     }}
 
-    /* Forces Row layout and prevents vertical stacking on mobile screens */
+    /* Controls Row - Strict side-by-side on mobile screen without wrapping */
     div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) {{
         direction: ltr !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         justify-content: flex-start !important;
-        gap: 8px !important;
-        margin-bottom: -10px;
+        gap: 10px !important;
+        margin-bottom: 5px;
     }}
     div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) div[data-testid="column"] {{
         width: max-content !important;
         flex: none !important;
     }}
     
-    /* Style only the top square buttons specifically */
+    /* Fixed Top Control Buttons Style */
     div[data-testid="column"]:has(.top-ctrl-lang) button,
     div[data-testid="column"]:has(.top-ctrl-theme) button {{
-        width: 42px !important;
-        height: 42px !important;
-        min-width: 42px !important;
-        max-width: 42px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
         padding: 0 !important;
         font-size: 18px !important;
         display: flex !important;
@@ -213,7 +212,7 @@ custom_css = f"""
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls (Language & Theme Switchers - Strictly Row Layout)
+# 5. Top Controls (Language & Theme Switchers - strictly row layout)
 col_lang, col_theme, _ = st.columns([1, 1, 12])
 
 with col_lang:

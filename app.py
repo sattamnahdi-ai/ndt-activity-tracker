@@ -46,13 +46,16 @@ if "toast_message" not in st.session_state:
 def add_activity_callback():
     line_type = st.session_state.line_type_key
     
-    # استخراج القيمة بناءً على نوع الخط (رقم الخط للـ TL، أو اسم المنطقة للـ OSI)
+    # استخراج القيم بناءً على نوع الخط والـ Location
     if line_type == "TL":
         line_val = st.session_state.line_key.replace("Line ", "")
+        km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
+        location_part = f"km {km_display}"
     else:
-        line_val = st.session_state.line_key  # ستكون المنطقة مباشرة (KHRS, ABJF, MZLG)
-    
-    km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
+        line_val = st.session_state.line_key  # المنطقة (KHRS, ABJF, MZLG)
+        # جلب رقم العين المكتوب، وفي حال كان فارغاً نضع 0 تلقائياً
+        wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
+        location_part = f"WH {wh_display}"
     
     # صياغة نص الـ UT بحيث تأتي الملاحظات بَعدَه مباشرة
     if st.session_state.remarks_key:
@@ -63,7 +66,7 @@ def add_activity_callback():
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
     # تركيب نص النشاط بالاعتماد على النوع المختار
-    single_activity = f"{line_type} {line_val} km {km_display}\n {ut_line}\nTech : {techs_list}"
+    single_activity = f"{line_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     
     # حفظ النشاط في القائمة
     st.session_state.activities_list.append(single_activity)
@@ -72,6 +75,7 @@ def add_activity_callback():
     st.session_state.line_type_key = "TL"
     st.session_state.line_key = "Line 1"
     st.session_state.km_key = 0.0
+    st.session_state.wh_key = ""  # تصفير حقل رقم العين
     st.session_state.remarks_key = ""
     st.session_state.ut_key = "completed"
     st.session_state.tech_key = []
@@ -101,9 +105,8 @@ st.radio(
     key="line_type_key"
 )
 
-# 🔄 التعديل الجديد: تغيير المسمى والخيارات ديناميكياً مع حماية الـ الذاكرة من التعارض
+# 🔄 تغيير المسمى والخيارات ديناميكياً مع حماية الـ الذاكرة من التعارض
 if st.session_state.line_type_key == "TL":
-    # إذا تحول المستخدم لـ TL وكانت القيمة السابقة منطقة، نعيد تصفيرها لخيار الخطوط لمنع حدوث خطأ
     if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
         st.session_state.line_key = "Line 1"
         
@@ -112,8 +115,17 @@ if st.session_state.line_type_key == "TL":
         [f"Line {i}" for i in range(1, 13)],
         key="line_key"
     )
+    
+    # إدخال الكيلومترات الخاص بـ TL
+    st.number_input(
+        "🛣️ إدخال الكيلومترات | Enter Kilometers", 
+        value=0.0,
+        min_value=0.0, 
+        step=0.001,
+        format="%g",
+        key="km_key"
+    )
 else:
-    # إذا تحول المستخدم لـ OSI وكان مخزن خط قديم، نغيره فوراً إلى أول منطقة لمنع حدوث خطأ
     if "line_key" in st.session_state and st.session_state.line_key not in ["KHRS", "ABJF", "MZLG"]:
         st.session_state.line_key = "KHRS"
         
@@ -122,16 +134,13 @@ else:
         ["KHRS", "ABJF", "MZLG"],
         key="line_key"
     )
-
-# إدخال الكيلومترات
-st.number_input(
-    "🛣️ إدخال الكيلومترات | Enter Kilometers", 
-    value=0.0,
-    min_value=0.0, 
-    step=0.001,
-    format="%g",
-    key="km_key"
-)
+    
+    # 🔥 التعديل الجديد: إدخال رقم العين أو Well Head الخاص بـ OSI بدلاً من الكيلومترات
+    st.text_input(
+        "🛢️ رقم العين أو الـ Well Head | Enter Well Number / Well Head",
+        key="wh_key",
+        placeholder="مثال: 12 أو KHRS-45"
+    )
 
 # حالة الـ UT
 st.radio(

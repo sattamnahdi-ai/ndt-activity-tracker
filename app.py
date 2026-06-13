@@ -64,7 +64,7 @@ translations = {
 
 t = translations[st.session_state.lang]
 
-# 4. Advanced Theme & Interface Coordination (Precise CSS Styling)
+# 4. Advanced Theme & Dynamic Color Configurations
 direction = "rtl" if st.session_state.lang == "AR" else "ltr"
 text_align = "right" if st.session_state.lang == "AR" else "left"
 
@@ -75,6 +75,9 @@ if st.session_state.theme == "Dark":
     btn_bg = "#262730"
     btn_text = "#FAFAFA"
     btn_border = "#4A4B50"
+    # Dynamic styling for Technicians Tags (Dark Mode)
+    tag_bg = "#1E293B"     # Dark slate blue
+    tag_text = "#93C5FD"   # Light blue text
 else:
     bg_color = "#FFFFFF"
     text_color = "#31333F"
@@ -82,6 +85,9 @@ else:
     btn_bg = "#FFFFFF"
     btn_text = "#31333F"
     btn_border = "#D0D4DC"
+    # Dynamic styling for Technicians Tags (Light Mode - Fixed!)
+    tag_bg = "#E3F2FD"     # Elegant Light blue background
+    tag_text = "#0D47A1"   # Clear Dark blue text
 
 custom_css = f"""
 <style>
@@ -95,7 +101,7 @@ custom_css = f"""
     }}
     
     /* 2. Base Text / Labels Handling */
-    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p {{
+    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
         text-align: {text_align};
@@ -109,7 +115,7 @@ custom_css = f"""
         margin-bottom: 20px;
     }}
     
-    /* 3. Inputs, Select boxes, and Dropdowns Style */
+    /* 3. Inputs, Select boxes, and Field Wrappers Style */
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
@@ -119,16 +125,32 @@ custom_css = f"""
         color: {text_color} !important;
     }}
     
-    /* 4. Multi-Select (Technicians Tags Fix) */
+    /* 4. Multi-Select (Technicians Tags & Icon Fix) */
     div[data-baseweb="tag"] {{
-        background-color: #1E88E5 !important;
+        background-color: {tag_bg} !important;
         border-radius: 6px !important;
+        padding: 4px 10px !important;
     }}
-    div[data-baseweb="tag"] span {{
-        color: #FFFFFF !important;
+    /* Force both Text and SVG Close Icon (X) inside tags to accept the coordinated theme color */
+    div[data-baseweb="tag"] * {{
+        color: {tag_text} !important;
+        fill: {tag_text} !important;
     }}
     
-    /* 5. Buttons Redesign (Coordinated with Light/Dark Theme) */
+    /* 5. Dropdown Menu Popover Alignment (Fixes the choices list contrast) */
+    div[data-baseweb="popover"], div[role="listbox"] {{
+        background-color: {bg_color} !important;
+    }}
+    div[data-baseweb="popover"] li, div[role="option"] {{
+        color: {text_color} !important;
+        background-color: {bg_color} !important;
+    }}
+    div[data-baseweb="popover"] li:hover, div[role="option"]:hover {{
+        background-color: {input_bg} !important;
+        color: #1E88E5 !important;
+    }}
+    
+    /* 6. Buttons Redesign (Coordinated with Light/Dark Theme) */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
@@ -144,7 +166,7 @@ custom_css = f"""
         background-color: {input_bg} !important;
     }}
     
-    /* Primary Action Button (WhatsApp Button) always stands out */
+    /* Primary Action Button (WhatsApp Button) */
     div.stButton > button[kind="primary"] {{
         background-color: #1E88E5 !important;
         color: #FFFFFF !important;

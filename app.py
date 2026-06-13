@@ -62,10 +62,9 @@ translations = {
     }
 }
 
-# Shortcut variable for current language dictionary
 t = translations[st.session_state.lang]
 
-# 4. Advanced Theme & Language CSS Injection (Fixes Light/Dark mode contrast)
+# 4. Advanced Theme & Interface Coordination (Precise CSS Styling)
 direction = "rtl" if st.session_state.lang == "AR" else "ltr"
 text_align = "right" if st.session_state.lang == "AR" else "left"
 
@@ -73,30 +72,35 @@ if st.session_state.theme == "Dark":
     bg_color = "#0E1117"
     text_color = "#FAFAFA"
     input_bg = "#262730"
+    btn_bg = "#262730"
+    btn_text = "#FAFAFA"
+    btn_border = "#4A4B50"
 else:
     bg_color = "#FFFFFF"
     text_color = "#31333F"
     input_bg = "#F0F2F6"
+    btn_bg = "#FFFFFF"
+    btn_text = "#31333F"
+    btn_border = "#D0D4DC"
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    /* 1. Main Background Force Color */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+    /* 1. Base App Container */
+    .stApp {{
         background-color: {bg_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
     }}
     
-    /* 2. Global Text Color Force to handle Light/Dark properly */
-    p, label, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
+    /* 2. Base Text / Labels Handling */
+    label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
         text-align: {text_align};
     }}
     
-    /* Exception for the Main Title */
     .main-title {{
         color: #1E88E5 !important;
         text-align: center !important;
@@ -105,21 +109,49 @@ custom_css = f"""
         margin-bottom: 20px;
     }}
     
-    /* 3. Inputs, Select boxes and Input wrappers text/background handling */
-    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input, div[role="listbox"] {{
+    /* 3. Inputs, Select boxes, and Dropdowns Style */
+    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
+        border-radius: 8px !important;
     }}
-    
     input {{
         color: {text_color} !important;
     }}
     
-    /* 4. MultiSelect selected tags fix */
+    /* 4. Multi-Select (Technicians Tags Fix) */
     div[data-baseweb="tag"] {{
         background-color: #1E88E5 !important;
+        border-radius: 6px !important;
     }}
     div[data-baseweb="tag"] span {{
+        color: #FFFFFF !important;
+    }}
+    
+    /* 5. Buttons Redesign (Coordinated with Light/Dark Theme) */
+    div.stButton > button {{
+        background-color: {btn_bg} !important;
+        color: {btn_text} !important;
+        border: 1px solid {btn_border} !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }}
+    div.stButton > button:hover {{
+        border-color: #1E88E5 !important;
+        color: #1E88E5 !important;
+        background-color: {input_bg} !important;
+    }}
+    
+    /* Primary Action Button (WhatsApp Button) always stands out */
+    div.stButton > button[kind="primary"] {{
+        background-color: #1E88E5 !important;
+        color: #FFFFFF !important;
+        border: none !important;
+    }}
+    div.stButton > button[kind="primary"]:hover {{
+        background-color: #1565C0 !important;
         color: #FFFFFF !important;
     }}
 </style>
@@ -288,4 +320,3 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
-

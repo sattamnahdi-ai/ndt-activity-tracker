@@ -79,15 +79,15 @@ if st.session_state.theme == "Dark":
     tag_text = "#93C5FD"   
     card_bg = "#1E293B"
 else:
-    # Coordinated Light Mode Colors
+    # Enhanced Light Mode Colors
     bg_color = "#F8F9FA"  
     text_color = "#212529"  
     input_bg = "#FFFFFF"  
     btn_bg = "#FFFFFF"
     btn_text = "#212529"
     btn_border = "#CED4DA"  
-    tag_bg = "#E7F5FF"     
-    tag_text = "#1C7ED6"   
+    tag_bg = "#E3F2FD"     # Clear, beautiful sky blue background for tech tags
+    tag_text = "#0D47A1"   # Deep contrast blue text for legibility
     card_bg = "#FFFFFF"
 
 custom_css = f"""
@@ -180,10 +180,12 @@ custom_css = f"""
         color: #FFFFFF !important;
     }}
 
-    /* Isolating Top Controls Row - Forces LTR & Side-by-side alignment always */
+    /* Forces Row layout and prevents vertical stacking on mobile screens */
     div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) {{
         direction: ltr !important;
         display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
         justify-content: flex-start !important;
         gap: 8px !important;
         margin-bottom: -10px;
@@ -211,7 +213,7 @@ custom_css = f"""
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls (Language & Theme Switchers - Clean Side-by-side Layout)
+# 5. Top Controls (Language & Theme Switchers - Strictly Row Layout)
 col_lang, col_theme, _ = st.columns([1, 1, 12])
 
 with col_lang:
@@ -251,7 +253,6 @@ def add_activity_callback():
         location_part = f"km {km_display}"
         single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     else:
-        # Formatted perfectly for OSI (e.g., ABJF-467 OSI)
         area_val = st.session_state.line_key
         wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
         single_activity = f"{area_val}-{wh_display} OSI\n {ut_line}\nTech : {techs_list}"
@@ -381,3 +382,4 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
+

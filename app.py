@@ -75,9 +75,8 @@ if st.session_state.theme == "Dark":
     btn_bg = "#262730"
     btn_text = "#FAFAFA"
     btn_border = "#4A4B50"
-    # Dynamic styling for Technicians Tags (Dark Mode)
-    tag_bg = "#1E293B"     # Dark slate blue
-    tag_text = "#93C5FD"   # Light blue text
+    tag_bg = "#1E293B"     
+    tag_text = "#93C5FD"   
 else:
     bg_color = "#FFFFFF"
     text_color = "#31333F"
@@ -85,22 +84,19 @@ else:
     btn_bg = "#FFFFFF"
     btn_text = "#31333F"
     btn_border = "#D0D4DC"
-    # Dynamic styling for Technicians Tags (Light Mode - Fixed!)
-    tag_bg = "#E3F2FD"     # Elegant Light blue background
-    tag_text = "#0D47A1"   # Clear Dark blue text
+    tag_bg = "#E3F2FD"     
+    tag_text = "#0D47A1"   
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    /* 1. Base App Container */
     .stApp {{
         background-color: {bg_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
     }}
     
-    /* 2. Base Text / Labels Handling */
     label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
@@ -115,7 +111,6 @@ custom_css = f"""
         margin-bottom: 20px;
     }}
     
-    /* 3. Inputs, Select boxes, and Field Wrappers Style */
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
@@ -125,19 +120,16 @@ custom_css = f"""
         color: {text_color} !important;
     }}
     
-    /* 4. Multi-Select (Technicians Tags & Icon Fix) */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 6px !important;
         padding: 4px 10px !important;
     }}
-    /* Force both Text and SVG Close Icon (X) inside tags to accept the coordinated theme color */
     div[data-baseweb="tag"] * {{
         color: {tag_text} !important;
         fill: {tag_text} !important;
     }}
     
-    /* 5. Dropdown Menu Popover Alignment (Fixes the choices list contrast) */
     div[data-baseweb="popover"], div[role="listbox"] {{
         background-color: {bg_color} !important;
     }}
@@ -150,7 +142,6 @@ custom_css = f"""
         color: #1E88E5 !important;
     }}
     
-    /* 6. Buttons Redesign (Coordinated with Light/Dark Theme) */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
@@ -166,7 +157,6 @@ custom_css = f"""
         background-color: {input_bg} !important;
     }}
     
-    /* Primary Action Button (WhatsApp Button) */
     div.stButton > button[kind="primary"] {{
         background-color: #1E88E5 !important;
         color: #FFFFFF !important;
@@ -201,23 +191,28 @@ st.markdown("---")
 def add_activity_callback():
     act_type = st.session_state.line_type_key
     
-    if act_type == "TL":
-        line_val = st.session_state.line_key.replace("Line ", "")
-        km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
-        location_part = f"km {km_display}"
-    else:
-        line_val = st.session_state.line_key
-        wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
-        location_part = f"WH {wh_display}"
-    
+    # 1. Build the UT Line
     if st.session_state.remarks_key:
         ut_line = f"UT {st.session_state.ut_key} {st.session_state.remarks_key}"
     else:
         ut_line = f"UT {st.session_state.ut_key}"
         
+    # 2. Build the Technicians List
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
+    # 3. Dynamic formatting based on type (TL vs OSI)
+    if act_type == "TL":
+        line_val = st.session_state.line_key.replace("Line ", "")
+        km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
+        location_part = f"km {km_display}"
+        single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
+    else:
+        # Custom Formatter for OSI (e.g., ABJF-455) without showing 'OSI' or 'WH'
+        area_val = st.session_state.line_key
+        wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
+        single_activity = f"{area_val}-{wh_display}\n {ut_line}\nTech : {techs_list}"
+    
+    # Save to list
     st.session_state.activities_list.append(single_activity)
     
     # Reset Fields

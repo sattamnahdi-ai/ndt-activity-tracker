@@ -10,11 +10,11 @@ if "activities_list" not in st.session_state:
 if "toast_message" not in st.session_state:
     st.session_state.toast_message = None
 if "lang" not in st.session_state:
-    st.session_state.lang = "EN"  # Default language
+    st.session_state.lang = "EN"
 if "theme" not in st.session_state:
-    st.session_state.theme = "Dark"  # Default theme
+    st.session_state.theme = "Dark"
 
-# 3. Translation Dictionary (Strictly professional, zero emojis)
+# 3. Professional Translation Dictionary (No Emojis)
 translations = {
     "EN": {
         "title": "Daily Activities Tracker",
@@ -74,12 +74,11 @@ translations = {
 
 t = translations[st.session_state.lang]
 
-# 4. Advanced Theme & Corporate Color Configurations
+# 4. Themes & Corporate Colors
 direction = "rtl" if st.session_state.lang == "AR" else "ltr"
 text_align = "right" if st.session_state.lang == "AR" else "left"
 
 if st.session_state.theme == "Dark":
-    # Corporate Dark Palette (Slate / Navy tones)
     bg_color = "#0F172A"
     text_color = "#F8FAFC"
     input_bg = "#1E293B"
@@ -91,79 +90,94 @@ if st.session_state.theme == "Dark":
     card_bg = "#1E293B"
     accent_color = "#38BDF8"
 else:
-    # Corporate Light Palette (White and Blue)
-    bg_color = "#FFFFFF"  
+    bg_color = "#F1F5F9"  
     text_color = "#0F172A"  
-    input_bg = "#F8FAFC"  
+    input_bg = "#FFFFFF"  
     btn_bg = "#FFFFFF"
     btn_text = "#0F172A"
     btn_border = "#CBD5E1"  
     tag_bg = "#EFF6FF"     
     tag_text = "#1E40AF"   
-    card_bg = "#F8FAFC"
+    card_bg = "#FFFFFF"
     accent_color = "#2563EB"
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    /* Base App Container & Mobile Optimization */
+    /* Base Reset and Padding Reduction */
     .stApp, [data-testid="stAppViewContainer"] {{
         background-color: {bg_color} !important;
         font-family: 'Inter', sans-serif !important;
         direction: {direction};
-        padding: 10px !important;
     }}
     
-    /* Base Text / Labels Handling */
+    .block-container {{
+        max-width: 650px !important;
+        padding-top: 15px !important;
+        padding-bottom: 20px !important;
+    }}
+    
+    /* Solid Fixed Rectangle Frame (App Card) */
+    .main-wrapper-box {{
+        background-color: {card_bg};
+        border: 1px solid {btn_border};
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-top: 5px;
+    }}
+    
+    /* Labels and Headings Formatting */
     label p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
         color: {text_color} !important;
         font-family: 'Inter', sans-serif !important;
         text-align: {text_align};
         font-size: 14px !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
+        margin-bottom: 2px !important;
     }}
     
-    /* Professional Clean Title */
     .main-title {{
         color: {accent_color} !important;
         text-align: center !important;
-        font-size: calc(20px + 1vw) !important;
+        font-size: 24px !important;
         font-weight: 700;
-        margin-bottom: 20px;
+        margin-top: 0px;
+        margin-bottom: 15px;
         letter-spacing: -0.5px;
     }}
     
-    /* Inputs, Select boxes Optimized for Corporate UI */
-    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
+    /* Perfect Alignment Harmony for Selectbox & Inputs */
+    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input, .stMultiSelect div {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
         border: 1px solid {btn_border} !important;
         border-radius: 6px !important;
-        min-height: 42px !important;
+        height: 40px !important;
     }}
     
-    /* Multi-Select Tags (Technicians) */
+    /* Multi-Select Tags Fix */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 4px !important;
-        padding: 4px 10px !important;
+        height: 26px !important;
     }}
     div[data-baseweb="tag"] * {{
         color: {tag_text} !important;
         fill: {tag_text} !important;
     }}
     
-    /* Buttons Optimized as Mobile Touch Targets */
+    /* Standardized Buttons Touch Targets */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
         border: 1px solid {btn_border} !important;
         border-radius: 6px !important;
-        padding: 12px 16px !important;
+        padding: 10px 16px !important;
         font-weight: 600 !important;
         width: 100% !important;
-        min-height: 44px !important;
+        height: 42px !important;
         font-size: 14px !important;
     }}
     div.stButton > button:hover {{
@@ -171,44 +185,42 @@ custom_css = f"""
         color: {accent_color} !important;
     }}
     
-    /* Action Button Custom Design */
+    /* Primary (WhatsApp) Button styling */
     div.stButton > button[kind="primary"] {{
         background-color: {accent_color} !important;
         color: #FFFFFF !important;
         border: none !important;
-    }}
-    div.stButton > button[kind="primary"]:hover {{
-        opacity: 0.9 !important;
+        height: 46px !important;
     }}
 
-    /* Controls Row side-by-side on Mobile Screens */
+    /* Compact Top Row Control Bars */
     div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) {{
         direction: ltr !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
-        margin-bottom: 15px;
+        justify-content: flex-start !important;
+        gap: 6px !important;
+        margin-bottom: 0px !important;
     }}
     div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) div[data-testid="column"] {{
         width: max-content !important;
         flex: none !important;
     }}
     
-    /* Clean Text Buttons for Top Controls */
     div[data-testid="column"]:has(.top-ctrl-lang) button,
     div[data-testid="column"]:has(.top-ctrl-theme) button {{
-        min-width: 80px !important;
-        height: 38px !important;
-        padding: 0 10px !important;
+        min-width: 90px !important;
+        height: 34px !important;
         font-size: 13px !important;
-        border-radius: 4px !important;
+        padding: 0 8px !important;
+        border-radius: 6px !important;
     }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls (Language & Theme Switchers - Clean Text Layout)
+# 5. Top Controls Row (Compact & clean)
 col_lang, col_theme, _ = st.columns([1, 1, 12])
 
 with col_lang:
@@ -223,23 +235,21 @@ with col_theme:
         st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
         st.rerun()
 
-st.markdown(f"<h1 class='main-title'>{t['title']}</h1>", unsafe_allow_html=True)
-st.markdown("---")
+# Open Wrapper Frame Box
+st.markdown('<div class="main-wrapper-box">', unsafe_allow_html=True)
 
-# --- 6. Callback Functions ---
+st.markdown(f"<h1 class='main-title'>{t['title']}</h1>", unsafe_allow_html=True)
+
+# --- 6. Callbacks ---
 def add_activity_callback():
     act_type = st.session_state.line_type_key
-    
-    # Build UT Line
     if st.session_state.remarks_key:
         ut_line = f"UT {st.session_state.ut_key} {st.session_state.remarks_key}"
     else:
         ut_line = f"UT {st.session_state.ut_key}"
         
-    # Build Technicians List
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    # Dynamic formatting based on type
     if act_type == "TL":
         line_val = st.session_state.line_key.replace("Line ", "")
         km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
@@ -248,7 +258,7 @@ def add_activity_callback():
         area_val = st.session_state.line_key
         wh_display = str(st.session_state.wh_key) if "wh_key" in st.session_state else "0"
         single_activity = f"{area_val}-{wh_display} OSI\n {ut_line}\nTech : {techs_list}"
-    else:  # Other Custom Entry
+    else:
         custom_val = st.session_state.custom_act_key if st.session_state.custom_act_key else "Custom Activity"
         single_activity = f"{custom_val}\n {ut_line}\nTech : {techs_list}"
     
@@ -263,7 +273,6 @@ def add_activity_callback():
     st.session_state.remarks_key = ""
     st.session_state.ut_key = "completed"
     st.session_state.tech_key = []
-    
     st.session_state.toast_message = t["success_toast"]
 
 def clear_all_callback():
@@ -277,15 +286,8 @@ if st.session_state.toast_message:
 # --- 7. Activity Input Section ---
 st.markdown(f"### {t['input_header']}")
 
-# Type of Activity
-st.radio(
-    t["act_type"],
-    ["TL", "OSI", "Other"],
-    horizontal=True,
-    key="line_type_key"
-)
+st.radio(t["act_type"], ["TL", "OSI", "Other"], horizontal=True, key="line_type_key")
 
-# Render inputs dynamically based on selection
 if st.session_state.line_type_key == "TL":
     if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
         st.session_state.line_key = "Line 1"
@@ -293,21 +295,16 @@ if st.session_state.line_type_key == "TL":
     st.number_input(t["km"], value=0.0, min_value=0.0, step=0.001, format="%g", key="km_key")
 
 elif st.session_state.line_type_key == "OSI":
-    # Updated MZLG to MZLJ
     if "line_key" in st.session_state and st.session_state.line_key not in ["KHRS", "ABJF", "MZLJ"]:
         st.session_state.line_key = "KHRS"
     st.selectbox(t["area"], ["KHRS", "ABJF", "MZLJ"], key="line_key")
-    # Numbers Only
     st.number_input(t["wh"], value=0, min_value=0, step=1, key="wh_key")
 
-else:  # Other Free Text Option
+else:
     st.text_input(t["custom_act"], key="custom_act_key")
 
-# UT Status & Remarks
 st.radio(t["ut"], ["completed", "Not completed"], horizontal=True, key="ut_key")
 st.text_input(t["remarks"], key="remarks_key")
-
-# Technicians
 st.multiselect(t["techs"], ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS", "FLC"], key="tech_key")
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -321,14 +318,12 @@ with col2:
 
 st.markdown("---")
 
-# --- 9. Preview and Send Section with Edit Support ---
+# --- 9. Preview and Send Section ---
 if st.session_state.activities_list:
     st.markdown(f"### {t['preview'].format(count=len(st.session_state.activities_list))}")
     
-    # Inline loop for viewing and editing each activity individually
     for i, activity in enumerate(st.session_state.activities_list):
         if st.session_state.get(f"editing_{i}", False):
-            # Edit mode
             st.text_area(f"{t['modify_title']} {i+1}", value=activity, key=f"act_input_{i}")
             col_save, col_cancel = st.columns(2)
             with col_save:
@@ -341,7 +336,6 @@ if st.session_state.activities_list:
                     st.session_state[f"editing_{i}"] = False
                     st.rerun()
         else:
-            # View mode with Edit Button
             st.code(activity, language="text")
             if st.button(f"{t['edit_btn']} {i+1}", key=f"edit_btn_{i}"):
                 st.session_state[f"editing_{i}"] = True
@@ -349,8 +343,6 @@ if st.session_state.activities_list:
             st.markdown("<br>", unsafe_allow_html=True)
             
     st.markdown("---")
-    
-    # Final Full Message Preview
     all_activities_joined = "\n\n".join(st.session_state.activities_list)
     final_whatsapp_text = f"Hello Activities today \n\n{all_activities_joined}"
     
@@ -362,3 +354,7 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
+
+# Close Wrapper Frame Box
+st.markdown('</div>', unsafe_allow_html=True)
+

@@ -65,44 +65,62 @@ translations = {
 # Shortcut variable for current language dictionary
 t = translations[st.session_state.lang]
 
-# 4. Custom Theme & Language CSS Injection
+# 4. Advanced Theme & Language CSS Injection (Fixes Light/Dark mode contrast)
 direction = "rtl" if st.session_state.lang == "AR" else "ltr"
 text_align = "right" if st.session_state.lang == "AR" else "left"
 
 if st.session_state.theme == "Dark":
-    bg_color = "#121212"
-    text_color = "#FFFFFF"
-    card_bg = "#1E1E1E"
-    input_bg = "#2D2D2D"
+    bg_color = "#0E1117"
+    text_color = "#FAFAFA"
+    input_bg = "#262730"
 else:
     bg_color = "#FFFFFF"
-    text_color = "#111111"
-    card_bg = "#F8F9FA"
-    input_bg = "#FFFFFF"
+    text_color = "#31333F"
+    input_bg = "#F0F2F6"
 
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+    /* 1. Main Background Force Color */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
         background-color: {bg_color} !important;
-        color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
+    }}
+    
+    /* 2. Global Text Color Force to handle Light/Dark properly */
+    p, label, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
+        color: {text_color} !important;
+        font-family: 'Cairo', sans-serif !important;
         text-align: {text_align};
     }}
     
+    /* Exception for the Main Title */
     .main-title {{
-        text-align: center;
-        color: #1E88E5;
+        color: #1E88E5 !important;
+        text-align: center !important;
         font-size: 26px;
         font-weight: 700;
         margin-bottom: 20px;
     }}
     
-    /* Input field styling adjustments for Dark/Light mode */
-    div[data-baseweb="select"], div[data-baseweb="input"], input {{
-        font-size: 16px !important;
+    /* 3. Inputs, Select boxes and Input wrappers text/background handling */
+    div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input, div[role="listbox"] {{
+        background-color: {input_bg} !important;
+        color: {text_color} !important;
+    }}
+    
+    input {{
+        color: {text_color} !important;
+    }}
+    
+    /* 4. MultiSelect selected tags fix */
+    div[data-baseweb="tag"] {{
+        background-color: #1E88E5 !important;
+    }}
+    div[data-baseweb="tag"] span {{
+        color: #FFFFFF !important;
     }}
 </style>
 """
@@ -145,7 +163,6 @@ def add_activity_callback():
         
     techs_list = "/".join(st.session_state.tech_key) if st.session_state.tech_key else "N/A"
     
-    # Keeping the core output format standard in English for reporting
     single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     st.session_state.activities_list.append(single_activity)
     
@@ -271,3 +288,4 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
+

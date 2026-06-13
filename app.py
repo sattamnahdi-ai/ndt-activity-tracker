@@ -14,7 +14,7 @@ if "lang" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
-# 3. Professional Translation Dictionary (No Emojis)
+# 3. Pure Professional Translations (Zero Emojis - Fixed Text Alignment)
 translations = {
     "EN": {
         "title": "Daily Activities Tracker",
@@ -45,7 +45,7 @@ translations = {
     },
     "AR": {
         "title": "متتبع الأنشطة اليومية",
-        "input_header": "إدخل بيانات النشاط",
+        "input_header": "إدخال بيانات النشاط",
         "act_type": "نوع النشاط",
         "custom_act": "أدخل نوع النشاط المخصص",
         "line_num": "اختر رقم الخط",
@@ -74,173 +74,166 @@ translations = {
 
 t = translations[st.session_state.lang]
 
-# 4. Themes & Corporate Colors
+# 4. Strict Layout Theme & Color Mapping
 direction = "rtl" if st.session_state.lang == "AR" else "ltr"
 text_align = "right" if st.session_state.lang == "AR" else "left"
 
 if st.session_state.theme == "Dark":
-    bg_color = "#0F172A"
-    text_color = "#F8FAFC"
-    input_bg = "#1E293B"
-    btn_bg = "#1E293B"
-    btn_text = "#F8FAFC"
-    btn_border = "#334155"
-    tag_bg = "#334155"     
-    tag_text = "#38BDF8"   
-    card_bg = "#1E293B"
-    accent_color = "#38BDF8"
+    bg_color = "#0B0F19"
+    card_bg = "#161B26"
+    text_color = "#F3F4F6"
+    input_bg = "#1F2635"
+    border_color = "#2D3748"
+    accent_color = "#0284C7" # Professional Royal Blue
+    tag_bg = "#2D3748"
+    tag_text = "#38BDF8"
 else:
-    bg_color = "#F1F5F9"  
-    text_color = "#0F172A"  
-    input_bg = "#FFFFFF"  
-    btn_bg = "#FFFFFF"
-    btn_text = "#0F172A"
-    btn_border = "#CBD5E1"  
-    tag_bg = "#EFF6FF"     
-    tag_text = "#1E40AF"   
+    bg_color = "#F8FAFC"
     card_bg = "#FFFFFF"
-    accent_color = "#2563EB"
+    text_color = "#0F172A"
+    input_bg = "#F1F5F9"
+    border_color = "#E2E8F0"
+    accent_color = "#1D4ED8" # Crisp Corporate Blue
+    tag_bg = "#E0F2FE"
+    tag_text = "#0369A1"
 
+# Injecting Native Overrides to force strict block containment and remove spaces
 custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    /* Base Reset and Padding Reduction */
+    /* Force Whole App Background */
     .stApp, [data-testid="stAppViewContainer"] {{
         background-color: {bg_color} !important;
         font-family: 'Inter', sans-serif !important;
-        direction: {direction};
+        direction: {direction} !important;
     }}
     
+    /* Absolute Control Over Content Container - Creates the Solid Fixed Box Layout */
     .block-container {{
-        max-width: 650px !important;
-        padding-top: 15px !important;
-        padding-bottom: 20px !important;
+        max-width: 600px !important;
+        padding-top: 20px !important;
+        padding-bottom: 30px !important;
+        background-color: {card_bg} !important;
+        border: 1px solid {border_color} !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        margin-top: 30px !important;
     }}
     
-    /* Solid Fixed Rectangle Frame (App Card) */
-    .main-wrapper-box {{
-        background-color: {card_bg};
-        border: 1px solid {btn_border};
-        border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        margin-top: 5px;
-    }}
-    
-    /* Labels and Headings Formatting */
-    label p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
-        color: {text_color} !important;
-        font-family: 'Inter', sans-serif !important;
-        text-align: {text_align};
-        font-size: 14px !important;
-        font-weight: 600 !important;
-        margin-bottom: 2px !important;
-    }}
-    
+    /* Tight Header/Title Formatting */
     .main-title {{
         color: {accent_color} !important;
         text-align: center !important;
-        font-size: 24px !important;
-        font-weight: 700;
-        margin-top: 0px;
-        margin-bottom: 15px;
+        font-size: 26px !important;
+        font-weight: 700 !important;
+        margin-top: 0px !important;
+        margin-bottom: 20px !important;
         letter-spacing: -0.5px;
     }}
     
-    /* Perfect Alignment Harmony for Selectbox & Inputs */
+    /* Strictly Harmonized Field Labels */
+    label p, .stRadio label, div[role="radiogroup"] label, [data-testid="stWidgetLabel"] p {{
+        color: {text_color} !important;
+        text-align: {text_align} !important;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        margin-bottom: 4px !important;
+        padding: 0 !important;
+    }}
+    
+    /* Complete Uniform Height & Width for Inputs (Fixes Select Line vs Enter KM discrepancy) */
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input, .stMultiSelect div {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
-        border: 1px solid {btn_border} !important;
+        border: 1px solid {border_color} !important;
         border-radius: 6px !important;
-        height: 40px !important;
+        height: 42px !important;
     }}
     
-    /* Multi-Select Tags Fix */
+    /* Fix for multi-select tags padding symmetry */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 4px !important;
-        height: 26px !important;
+        height: 28px !important;
     }}
     div[data-baseweb="tag"] * {{
         color: {tag_text} !important;
         fill: {tag_text} !important;
     }}
     
-    /* Standardized Buttons Touch Targets */
+    /* Standardized Functional Buttons */
     div.stButton > button {{
-        background-color: {btn_bg} !important;
-        color: {btn_text} !important;
-        border: 1px solid {btn_border} !important;
+        background-color: {input_bg} !important;
+        color: {text_color} !important;
+        border: 1px solid {border_color} !important;
         border-radius: 6px !important;
-        padding: 10px 16px !important;
         font-weight: 600 !important;
         width: 100% !important;
-        height: 42px !important;
+        height: 44px !important;
         font-size: 14px !important;
+        transition: all 0.2s ease !important;
     }}
     div.stButton > button:hover {{
         border-color: {accent_color} !important;
         color: {accent_color} !important;
     }}
     
-    /* Primary (WhatsApp) Button styling */
+    /* Action Primary Buttons (WhatsApp) */
     div.stButton > button[kind="primary"] {{
         background-color: {accent_color} !important;
         color: #FFFFFF !important;
         border: none !important;
-        height: 46px !important;
+        height: 48px !important;
     }}
 
-    /* Compact Top Row Control Bars */
-    div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) {{
+    /* Upper Utility Controls Tightly Fastened Together */
+    div[data-testid="stHorizontalBlock"]:has(.top-utility-lang) {{
         direction: ltr !important;
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         justify-content: flex-start !important;
-        gap: 6px !important;
-        margin-bottom: 0px !important;
+        gap: 8px !important;
+        margin-bottom: 25px !important;
     }}
-    div[data-testid="stHorizontalBlock"]:has(.top-ctrl-lang) div[data-testid="column"] {{
-        width: max-content !important;
+    div[data-testid="stHorizontalBlock"]:has(.top-utility-lang) div[data-testid="column"] {{
+        width: auto !important;
         flex: none !important;
     }}
     
-    div[data-testid="column"]:has(.top-ctrl-lang) button,
-    div[data-testid="column"]:has(.top-ctrl-theme) button {{
-        min-width: 90px !important;
-        height: 34px !important;
-        font-size: 13px !important;
-        padding: 0 8px !important;
-        border-radius: 6px !important;
+    /* Compact Top Row Control Bars Style */
+    div[data-testid="column"]:has(.top-utility-lang) button,
+    div[data-testid="column"]:has(.top-utility-theme) button {{
+        min-width: 85px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+        padding: 0 10px !important;
+        border-radius: 4px !important;
     }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls Row (Compact & clean)
-col_lang, col_theme, _ = st.columns([1, 1, 12])
+# 5. Top Controls Header Row (Tightly Linked)
+col_lang, col_theme, _ = st.columns([1, 1, 10])
 
 with col_lang:
-    st.markdown('<span class="top-ctrl-lang"></span>', unsafe_allow_html=True)
+    st.markdown('<span class="top-utility-lang"></span>', unsafe_allow_html=True)
     if st.button(t["toggle_lang"], key="lang_btn"):
         st.session_state.lang = "AR" if st.session_state.lang == "EN" else "EN"
         st.rerun()
 
 with col_theme:
-    st.markdown('<span class="top-ctrl-theme"></span>', unsafe_allow_html=True)
+    st.markdown('<span class="top-utility-theme"></span>', unsafe_allow_html=True)
     if st.button(t["toggle_theme"], key="theme_btn"):
         st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
         st.rerun()
 
-# Open Wrapper Frame Box
-st.markdown('<div class="main-wrapper-box">', unsafe_allow_html=True)
-
+# Professional Title
 st.markdown(f"<h1 class='main-title'>{t['title']}</h1>", unsafe_allow_html=True)
 
-# --- 6. Callbacks ---
+# --- 6. Execution Callback Logic ---
 def add_activity_callback():
     act_type = st.session_state.line_type_key
     if st.session_state.remarks_key:
@@ -283,11 +276,12 @@ if st.session_state.toast_message:
     st.toast(st.session_state.toast_message)
     st.session_state.toast_message = None
 
-# --- 7. Activity Input Section ---
-st.markdown(f"### {t['input_header']}")
+# --- 7. Activity Data Input Form Block ---
+st.markdown(f"##### {t['input_header']}")
 
 st.radio(t["act_type"], ["TL", "OSI", "Other"], horizontal=True, key="line_type_key")
 
+# Form Column Alignment Normalization
 if st.session_state.line_type_key == "TL":
     if "line_key" in st.session_state and st.session_state.line_key not in [f"Line {i}" for i in range(1, 13)]:
         st.session_state.line_key = "Line 1"
@@ -307,20 +301,20 @@ st.radio(t["ut"], ["completed", "Not completed"], horizontal=True, key="ut_key")
 st.text_input(t["remarks"], key="remarks_key")
 st.multiselect(t["techs"], ["SKT", "SAN", "NAA", "NBO", "HSQ", "HAK", "IAS", "FLC"], key="tech_key")
 
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
-# --- 8. Action Buttons ---
+# --- 8. Core Layout Action Buttons ---
 col1, col2 = st.columns(2)
 with col1:
     st.button(t["add_btn"], use_container_width=True, type="secondary", on_click=add_activity_callback)
 with col2:
     st.button(t["clear_btn"], use_container_width=True, on_click=clear_all_callback)
 
-st.markdown("---")
+st.markdown("<hr style='margin: 20px 0; border: 0; border-top: 1px solid #2D3748;'>", unsafe_allow_html=True)
 
-# --- 9. Preview and Send Section ---
+# --- 9. Output Processing & Live Modification Section ---
 if st.session_state.activities_list:
-    st.markdown(f"### {t['preview'].format(count=len(st.session_state.activities_list))}")
+    st.markdown(f"##### {t['preview'].format(count=len(st.session_state.activities_list))}")
     
     for i, activity in enumerate(st.session_state.activities_list):
         if st.session_state.get(f"editing_{i}", False):
@@ -340,13 +334,14 @@ if st.session_state.activities_list:
             if st.button(f"{t['edit_btn']} {i+1}", key=f"edit_btn_{i}"):
                 st.session_state[f"editing_{i}"] = True
                 st.rerun()
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
             
-    st.markdown("---")
+    st.markdown("<hr style='margin: 20px 0; border: 0; border-top: 1px solid #2D3748;'>", unsafe_allow_html=True)
+    
     all_activities_joined = "\n\n".join(st.session_state.activities_list)
     final_whatsapp_text = f"Hello Activities today \n\n{all_activities_joined}"
     
-    st.markdown(f"### {t['final_msg']}")
+    st.markdown(f"##### {t['final_msg']}")
     st.code(final_whatsapp_text, language="text")
     
     encoded_message = urllib.parse.quote(final_whatsapp_text)
@@ -354,7 +349,3 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
-
-# Close Wrapper Frame Box
-st.markdown('</div>', unsafe_allow_html=True)
-

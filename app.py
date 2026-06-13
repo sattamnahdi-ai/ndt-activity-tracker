@@ -91,12 +91,14 @@ custom_css = f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
+    /* Base App Container */
     .stApp {{
         background-color: {bg_color} !important;
         font-family: 'Cairo', sans-serif !important;
         direction: {direction};
     }}
     
+    /* Base Text / Labels Handling */
     label, p, h1, h2, h3, span, [data-testid="stMarkdownContainer"] p, .stRadio label, div[role="radiogroup"] label {{
         color: {text_color} !important;
         font-family: 'Cairo', sans-serif !important;
@@ -111,6 +113,7 @@ custom_css = f"""
         margin-bottom: 20px;
     }}
     
+    /* Inputs, Select boxes, and Field Wrappers Style */
     div[data-baseweb="input"], div[data-baseweb="select"], .stSelectbox div, .stTextInput input, .stNumberInput input {{
         background-color: {input_bg} !important;
         color: {text_color} !important;
@@ -120,6 +123,7 @@ custom_css = f"""
         color: {text_color} !important;
     }}
     
+    /* Multi-Select (Technicians Tags & Icon Fix) */
     div[data-baseweb="tag"] {{
         background-color: {tag_bg} !important;
         border-radius: 6px !important;
@@ -130,6 +134,7 @@ custom_css = f"""
         fill: {tag_text} !important;
     }}
     
+    /* Dropdown Menu Popover Alignment */
     div[data-baseweb="popover"], div[role="listbox"] {{
         background-color: {bg_color} !important;
     }}
@@ -142,6 +147,7 @@ custom_css = f"""
         color: #1E88E5 !important;
     }}
     
+    /* Buttons Redesign */
     div.stButton > button {{
         background-color: {btn_bg} !important;
         color: {btn_text} !important;
@@ -157,6 +163,7 @@ custom_css = f"""
         background-color: {input_bg} !important;
     }}
     
+    /* Primary Action Button (WhatsApp Button) */
     div.stButton > button[kind="primary"] {{
         background-color: #1E88E5 !important;
         color: #FFFFFF !important;
@@ -166,20 +173,39 @@ custom_css = f"""
         background-color: #1565C0 !important;
         color: #FFFFFF !important;
     }}
+
+    /* Top Controls Custom Layout (Forcing Left-Corner Small Squares) */
+    div[data-testid="stHorizontalBlock"]:first-of-type {{
+        direction: ltr !important;
+        margin-bottom: -15px;
+    }}
+    div[data-testid="stHorizontalBlock"]:first-of-type div.stButton > button {{
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        max-width: 42px !important;
+        padding: 0 !important;
+        font-size: 18px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+    }}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 5. Top Controls (Language & Theme Switchers)
-col_lang, col_theme = st.columns(2)
+# 5. Top Controls (Language & Theme Switchers - Small Squares on the Left)
+col_lang, col_theme, _ = st.columns([1, 1, 12])
 
 with col_lang:
-    if st.button(t["toggle_lang"], use_container_width=True):
+    if st.button("🌐", key="lang_btn", help=t["toggle_lang"]):
         st.session_state.lang = "AR" if st.session_state.lang == "EN" else "EN"
         st.rerun()
 
 with col_theme:
-    if st.button(t["toggle_theme"], use_container_width=True):
+    theme_emoji = "☀️" if st.session_state.theme == "Dark" else "🌙"
+    if st.button(theme_emoji, key="theme_btn", help=t["toggle_theme"]):
         st.session_state.theme = "Dark" if st.session_state.theme == "Light" else "Light"
         st.rerun()
 
@@ -207,10 +233,10 @@ def add_activity_callback():
         location_part = f"km {km_display}"
         single_activity = f"{act_type} {line_val} {location_part}\n {ut_line}\nTech : {techs_list}"
     else:
-        # Custom Formatter for OSI (e.g., ABJF-455) without showing 'OSI' or 'WH'
+        # Formatted for OSI (e.g., ABJF-467 OSI) according to your request
         area_val = st.session_state.line_key
         wh_display = st.session_state.wh_key if ("wh_key" in st.session_state and st.session_state.wh_key) else "0"
-        single_activity = f"{area_val}-{wh_display}\n {ut_line}\nTech : {techs_list}"
+        single_activity = f"{area_val}-{wh_display} OSI\n {ut_line}\nTech : {techs_list}"
     
     # Save to list
     st.session_state.activities_list.append(single_activity)
@@ -337,3 +363,4 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
+

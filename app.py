@@ -36,7 +36,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown("<h1 class='main-title'>📋 النشاط اليومي المتعدد | Daily Activities</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
-# 3. تهيئة الذاكرة التخزينية وحالات الإشعارات
+# 3. تهيئة الذاكرة التخزينية وح حالات الإشعارات
 if "activities_list" not in st.session_state:
     st.session_state.activities_list = []
 if "toast_message" not in st.session_state:
@@ -46,7 +46,7 @@ if "toast_message" not in st.session_state:
 def add_activity_callback():
     line_type = st.session_state.line_type_key
     
-    # استخراج القيم بناءً على نوع الخط والـ Location
+    # استخراج القيم بناءً على نوع النشاط والـ Location
     if line_type == "TL":
         line_val = st.session_state.line_key.replace("Line ", "")
         km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
@@ -97,9 +97,9 @@ if st.session_state.toast_message:
 # --- قسم إدخال بيانات النشاط الحالي ---
 st.markdown("### 📥 إدخال بيانات النشاط | Enter Activity Details")
 
-# اختيار نوع الخط (TL أو OSI)
+# 🔥 التعديل الجديد: تم تغيير المسمى هنا إلى نوع النشاط | Type of Activity
 st.radio(
-    "🏷️ نوع الخط | Line Type",
+    "🏷️ نوع النشاط | Type of Activity",
     ["TL", "OSI"],
     horizontal=True,
     key="line_type_key"
@@ -135,7 +135,7 @@ else:
         key="line_key"
     )
     
-    # 🔥 التعديل الجديد: إدخال رقم العين أو Well Head الخاص بـ OSI بدلاً من الكيلومترات
+    # إدخال رقم العين أو Well Head الخاص بـ OSI بدلاً من الكيلومترات
     st.text_input(
         "🛢️ رقم العين أو الـ Well Head | Enter Well Number / Well Head",
         key="wh_key",

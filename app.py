@@ -251,8 +251,10 @@ def add_activity_callback():
         wh_display = str(st.session_state.wh_key) if "wh_key" in st.session_state else "0"
         single_activity = f"{area_val}-{wh_display} OSI\n {ut_line}\nTech : {techs_list}"
     else:
+        # التعديل هنا: جلب الكيلومترات وصياغتها لخيار Other
         custom_val = st.session_state.custom_act_key if st.session_state.custom_act_key else "Custom Activity"
-        single_activity = f"{custom_val}\n {ut_line}\nTech : {techs_list}"
+        km_display = str(st.session_state.km_key) if st.session_state.km_key != 0.0 else "0"
+        single_activity = f"{custom_val} km {km_display}\n {ut_line}\nTech : {techs_list}"
     
     st.session_state.activities_list.append(single_activity)
     
@@ -293,7 +295,9 @@ elif st.session_state.line_type_key == "OSI":
     st.number_input(t["wh"], value=0, min_value=0, step=1, key="wh_key")
 
 else:
+    # التعديل هنا: إضافة إدخال الكيلومترات تحت خيار Other
     st.text_input(t["custom_act"], key="custom_act_key")
+    st.number_input(t["km"], value=0.0, min_value=0.0, step=0.001, format="%g", key="km_key")
 
 st.radio(t["ut"], ["completed", "Not completed"], horizontal=True, key="ut_key")
 st.text_input(t["remarks"], key="remarks_key")
@@ -347,4 +351,3 @@ if st.session_state.activities_list:
     st.link_button(t["send_wa"], whatsapp_url, use_container_width=True, type="primary")
 else:
     st.info(t["empty"])
-
